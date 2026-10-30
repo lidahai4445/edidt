@@ -1,0 +1,80 @@
+{
+  "queryInfo": {
+    "inquirer": "李嘉旺",
+    "content": "元器件型号详情",
+    "time": "2026-09-09 09:06:26",
+    "code": "D6B79C81338E0589BB1D7AC29BC7698Fecmp",
+    "fileUrl": "./report.pdf",
+    "buttonText": "点击查看"
+  },
+  "warningText": "此核验码有效，请核对元器件参数是否正确！",
+  "tableTitle": "元器件参数详情表",
+  "noteText": "注：状态表示元器件核验结果",
+  "printDate": "2026-09-09",
+  "pageInfo": "第1页，共2页",
+  "sealText": "元器件核验专用章",
+  "upperTable": [
+    {
+      "name": "运算放大器",
+      "model": "OP07CP",
+      "package": "DIP-8",
+      "spec": "低噪声精密运放",
+      "vendor": "TI",
+      "batch": "2534+",
+      "category": "模拟芯片",
+      "status": "正品"
+    },
+    {
+      "name": "STM32单片机",
+      "model": "STM32F103C8T6",
+      "package": "LQFP48",
+      "spec": "72MHz,64KB Flash",
+      "vendor": "ST",
+      "batch": "2611+",
+      "category": "MCU",
+      "status": "正品"
+    },
+    {
+      "name": "稳压LDO",
+      "model": "AMS1117-3.3",
+      "package": "SOT-223",
+      "spec": "3.3V 1A",
+      "vendor": "AMS",
+      "batch": "2605+",
+      "category": "电源芯片",
+      "status": "正品"
+    },
+    {
+      "name": "光耦",
+      "model": "PC817C",
+      "package": "DIP-4",
+      "spec": "电流传输比50~600%",
+      "vendor": "SHARP",
+      "batch": "2548+",
+      "category": "光电器件",
+      "status": "正品"
+    }
+  ],
+  "lowerTable": [
+    {
+      "name": "电阻",
+      "model": "0805 10kΩ",
+      "package": "0805",
+      "spec": "5% 1/8W",
+      "vendor": "国巨",
+      "batch": "2602+",
+      "category": "无源器件",
+      "status": "正品"
+    },
+    {
+      "name": "电容",
+      "model": "0603 104",
+      "package": "0603",
+      "spec": "0.1uF 50V",
+      "vendor": "三星",
+      "batch": "2601+",
+      "category": "无源器件",
+      "status": "正品"
+    }
+  ]
+}

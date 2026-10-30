@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0, user-scalable=yes">
+  <title>元器件可信查询服务平台</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      background-color: #ffffff;
+      color: #333333;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* 顶部标题区：纯展示无任何伪装控件 */
+    .header-bar {
+      text-align: center;
+      padding: 18px 16px 14px;
+      border-bottom: 1px solid #eeeeee;
+      background-color: #ffffff;
+    }
+
+    .header-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #222222;
+      letter-spacing: 0.5px;
+    }
+
+    /* 主体容器 */
+    .main-container {
+      max-width: 1260px;
+      margin: 0 auto;
+      padding: 18px 16px 48px;
+    }
+
+    .section-heading {
+      font-size: 16px;
+      font-weight: 700;
+      color: #333333;
+      margin-bottom: 12px;
+    }
+
+    /* 查询信息两列表 */
+    .info-table {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1px solid #e6e6e6;
+      margin-bottom: 22px;
+      font-size: 14px;
+    }
+
+    .info-table tr {
+      border-bottom: 1px solid #e6e6e6;
+    }
+
+    .info-table td {
+      padding: 13px 16px;
+      vertical-align: middle;
+    }
+
+    .info-table td.label-col {
+      width: 28%;
+      max-width: 340px;
+      background-color: #f7f8fa;
+      font-weight: 700;
+      text-align: center;
+      color: #222222;
+      border-right: 1px solid #e6e6e6;
+    }
+
+    .info-table td.val-col {
+      background-color: #ffffff;
+      color: #333333;
+      word-break: break-all;
+    }
+
+    /* 点击查看绿色按钮 */
+    .btn-view {
+      display: inline-block;
+      background-color: #1ca261;
+      color: #ffffff;
+      border: none;
+      border-radius: 5px;
+      padding: 8px 26px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .btn-view:hover {
+      background-color: #178a52;
+    }
+
+    .btn-view:active {
+      background-color: #137444;
+    }
+
+    /* 红字核验警示语 */
+    .warning-banner {
+      font-size: 16px;
+      font-weight: 700;
+      color: #c9302c;
+      margin: 18px 0 16px;
+    }
+
+    /* 参数详情表区域 */
+    .detail-block {
+      position: relative;
+      margin-bottom: 22px;
+    }
+
+    .detail-header-row {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 10px;
+      min-height: 36px;
+    }
+
+    .detail-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #111111;
+      text-align: center;
+    }
+
+    /* 右侧二维码防伪示意框（还原截图右侧小框） */
+    .qr-placeholder-box {
+      position: absolute;
+      right: 6px;
+      bottom: -8px;
+      width: 52px;
+      height: 52px;
+      border: 1px solid #cccccc;
+      background-color: rgba(255, 255, 255, 0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      color: #555555;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .table-scroll-wrap {
+      position: relative;
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .param-table {
+      width: 100%;
+      min-width: 680px;
+      border-collapse: collapse;
+      border: 1px solid #cccccc;
+      font-size: 13px;
+      text-align: center;
+      background-color: #ffffff;
+    }
+
+    .param-table th {
+      background-color: #efefef;
+      color: #222222;
+      font-weight: 700;
+      padding: 8px 6px;
+      border: 1px solid #cccccc;
+    }
+
+    .param-table td {
+      padding: 7px 6px;
+      border: 1px solid #cccccc;
+      color: #333333;
+    }
+
+    .param-table .empty-end-row td {
+      color: #444444;
+      padding: 7px 6px;
+      letter-spacing: 1px;
+    }
+
+    /* 红色半透明核验印章（内联 SVG 容器） */
+    .seal-container {
+      position: absolute;
+      left: 50%;
+      top: 52%;
+      transform: translate(-50%, -44%);
+      width: 126px;
+      height: 126px;
+      pointer-events: none;
+      z-index: 5;
+      user-select: none;
+    }
+
+    /* 表底注释与页码行 */
+    .table-meta-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      font-size: 12px;
+      color: #555555;
+      margin-top: 8px;
+      padding: 0 2px;
+    }
+
+    .table-meta-right span + span {
+      margin-left: 14px;
+    }
+
+    /* 文件预览模态框 */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background-color: rgba(0, 0, 0, 0.55);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-backdrop.show {
+      display: flex;
+    }
+
+    .modal-panel {
+      background-color: #ffffff;
+      width: 100%;
+      max-width: 820px;
+      border-radius: 6px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+      display: flex;
+      flex-direction: column;
+      max-height: 90vh;
+    }
+
+    .modal-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 18px;
+      border-bottom: 1px solid #eaeaea;
+      background-color: #f8f9fa;
+    }
+
+    .modal-top-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #222222;
+    }
+
+    .modal-close-btn {
+      background: #e9ecef;
+      border: none;
+      border-radius: 4px;
+      padding: 5px 12px;
+      font-size: 13px;
+      color: #333333;
+      cursor: pointer;
+    }
+
+    .modal-close-btn:hover {
+      background: #dde2e6;
+    }
+
+    .modal-content-area {
+      padding: 20px;
+      overflow-y: auto;
+      flex: 1;
+      text-align: center;
+      background-color: #fdfdfd;
+    }
+
+    /* 内置核验报告单预览样式（当未上传外部图片/PDF或作为默认可视化预览） */
+    .cert-sheet {
+      border: 2px solid #d9534f;
+      padding: 20px 16px;
+      background-color: #ffffff;
+      text-align: left;
+      position: relative;
+    }
+
+    .cert-sheet-title {
+      text-align: center;
+      font-size: 18px;
+      font-weight: 700;
+      color: #c9302c;
+      margin-bottom: 14px;
+      letter-spacing: 1px;
+    }
+
+    .cert-meta-list {
+      font-size: 13px;
+      color: #333333;
+      margin-bottom: 14px;
+      line-height: 1.8;
+    }
+
+    /* 手机竖屏自适应微调 */
+    @media (max-width: 640px) {
+      .header-title {
+        font-size: 18px;
+      }
+      .main-container {
+        padding: 14px 10px 36px;
+      }
+      .info-table td {
+        padding: 11px 10px;
+        font-size: 13px;
+      }
+      .info-table td.label-col {
+        width: 32%;
+      }
+      .warning-banner {
+        font-size: 14px;
+      }
+      .detail-title {
+        font-size: 15px;
+      }
+      .seal-container {
+        width: 108px;
+        height: 108px;
+      }
+      .qr-placeholder-box {
+        width: 44px;
+        height: 44px;
+        font-size: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 顶部标题栏：严格遵循防微信风控规范，仅保留居中黑体大标题 -->
+  <header class="header-bar">
+    <h1 class="header-title">元器件可信查询服务平台</h1>
+  </header>
+
+  <main class="main-container">
+    <!-- 查询信息 -->
+    <div class="section-heading">查询信息</div>
+    <table class="info-table">
+      <tbody>
+        <tr>
+          <td class="label-col">查询人</td>
+          <td class="val-col" id="val-inquirer">李嘉旺</td>
+        </tr>
+        <tr>
+          <td class="label-col">查询内容</td>
+          <td class="val-col" id="val-content">元器件型号详情</td>
+        </tr>
+        <tr>
+          <td class="label-col">查询时间</td>
+          <td class="val-col" id="val-time">2026-09-09 09:06:26</td>
+        </tr>
+        <tr>
+          <td class="label-col">查询编码</td>
+          <td class="val-col" id="val-code">D6B79C81338E0589BB1D7AC29BC7698Fecmp</td>
+        </tr>
+        <tr>
+          <td class="label-col">查看文件</td>
+          <td class="val-col">
+            <button type="button" class="btn-view" id="btn-open-modal">点击查看</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- 红字核验警示语 -->
+    <div class="warning-banner" id="val-warning">此核验码有效，请核对元器件参数是否正确！</div>
+
+    <!-- 上表：元器件参数详情表（带红色双圈印章） -->
+    <section class="detail-block">
+      <div class="detail-header-row">
+        <div class="detail-title" id="val-upper-title">元器件参数详情表</div>
+        <div class="qr-placeholder-box">二维码</div>
+      </div>
+
+      <div class="table-scroll-wrap">
+        <table class="param-table">
+          <thead>
+            <tr>
+              <th style="width: 13%;">元器件名称</th>
+              <th style="width: 19%;">型号</th>
+              <th style="width: 11%;">封装</th>
+              <th style="width: 21%;">参数规格</th>
+              <th style="width: 10%;">厂商</th>
+              <th style="width: 9%;">批次</th>
+              <th style="width: 10%;">类别</th>
+              <th style="width: 7%;">状态</th>
+            </tr>
+          </thead>
+          <tbody id="upper-table-body">
+            <!-- 动态渲染 -->
+          </tbody>
+        </table>
+
+        <!-- 纯内联 SVG 半透明红色双圈圆形印章（旋转 -18 度，pointer-events: none） -->
+        <div class="seal-container" aria-hidden="true">
+          <svg viewBox="0 0 140 140" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+            <g opacity="0.82" transform="rotate(-18, 70, 70)">
+              <!-- 外圈粗红线 -->
+              <circle cx="70" cy="70" r="64" fill="none" stroke="#d91e18" stroke-width="3.2" />
+              <!-- 内圈细红线 -->
+              <circle cx="70" cy="70" r="59.5" fill="none" stroke="#d91e18" stroke-width="1.1" />
+              <!-- 中心旋转核验专用章文字 -->
+              <text x="70" y="74"
+                    fill="#d91e18"
+                    font-size="13.5"
+                    font-weight="bold"
+                    font-family="'SimSun', 'STSong', 'Microsoft YaHei', sans-serif"
+                    text-anchor="middle"
+                    letter-spacing="0.5"
+                    id="val-seal-text">元器件核验专用章</text>
+            </g>
+          </svg>
+        </div>
+      </div>
+
+      <div class="table-meta-bar">
+        <div id="val-note">注：状态表示元器件核验结果</div>
+        <div class="table-meta-right">
+          <span>打印日期：<strong style="font-weight: 400;" id="val-print-date">2026-09-09</strong></span>
+          <span id="val-page-info">第1页，共2页</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 下表：元器件参数详情表（末行合并显示“以下空白”） -->
+    <section class="detail-block" style="margin-top: 28px;">
+      <div class="detail-header-row">
+        <div class="detail-title" id="val-lower-title">元器件参数详情表</div>
+      </div>
+
+      <div class="table-scroll-wrap">
+        <table class="param-table">
+          <thead>
+            <tr>
+              <th style="width: 13%;">元器件名称</th>
+              <th style="width: 19%;">型号</th>
+              <th style="width: 11%;">封装</th>
+              <th style="width: 21%;">参数规格</th>
+              <th style="width: 10%;">厂商</th>
+              <th style="width: 9%;">批次</th>
+              <th style="width: 10%;">类别</th>
+              <th style="width: 7%;">状态</th>
+            </tr>
+          </thead>
+          <tbody id="lower-table-body">
+            <!-- 动态渲染 -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- 文件预览模态框 -->
+  <div class="modal-backdrop" id="file-modal" role="dialog" aria-modal="true">
+    <div class="modal-panel">
+      <div class="modal-top">
+        <span class="modal-top-title">核验文件预览</span>
+        <button type="button" class="modal-close-btn" id="btn-close-modal">关闭预览</button>
+      </div>
+      <div class="modal-content-area" id="modal-body-content">
+        <!-- 动态填充预览内容 -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 内置兜底默认数据（确保即使本地直接双击打开也能完整渲染）
+    const DEFAULT_DATA = {
+      queryInfo: {
+        inquirer: "李嘉旺",
+        content: "元器件型号详情",
+        time: "2026-09-09 09:06:26",
+        code: "D6B79C81338E0589BB1D7AC29BC7698Fecmp",
+        fileUrl: "./report.pdf",
+        buttonText: "点击查看"
+      },
+      warningText: "此核验码有效，请核对元器件参数是否正确！",
+      tableTitle: "元器件参数详情表",
+      noteText: "注：状态表示元器件核验结果",
+      printDate: "2026-09-09",
+      pageInfo: "第1页，共2页",
+      sealText: "元器件核验专用章",
+      upperTable: [
+        { name: "运算放大器", model: "OP07CP", package: "DIP-8", spec: "低噪声精密运放", vendor: "TI", batch: "2534+", category: "模拟芯片", status: "正品" },
+        { name: "STM32单片机", model: "STM32F103C8T6", package: "LQFP48", spec: "72MHz,64KB Flash", vendor: "ST", batch: "2611+", category: "MCU", status: "正品" },
+        { name: "稳压LDO", model: "AMS1117-3.3", package: "SOT-223", spec: "3.3V 1A", vendor: "AMS", batch: "2605+", category: "电源芯片", status: "正品" },
+        { name: "光耦", model: "PC817C", package: "DIP-4", spec: "电流传输比50~600%", vendor: "SHARP", batch: "2548+", category: "光电器件", status: "正品" }
+      ],
+      lowerTable: [
+        { name: "电阻", model: "0805 10kΩ", package: "0805", spec: "5% 1/8W", vendor: "国巨", batch: "2602+", category: "无源器件", status: "正品" },
+        { name: "电容", model: "0603 104", package: "0603", spec: "0.1uF 50V", vendor: "三星", batch: "2601+", category: "无源器件", status: "正品" }
+      ]
+    };
+
+    let currentData = DEFAULT_DATA;
+
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return "";
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function renderRows(items, includeBlankEnd) {
+      const rowsHtml = (items || []).map(item => `
+        <tr>
+          <td>${escapeHtml(item.name)}</td>
+          <td>${escapeHtml(item.model)}</td>
+          <td>${escapeHtml(item.package)}</td>
+          <td>${escapeHtml(item.spec)}</td>
+          <td>${escapeHtml(item.vendor)}</td>
+          <td>${escapeHtml(item.batch)}</td>
+          <td>${escapeHtml(item.category)}</td>
+          <td>${escapeHtml(item.status)}</td>
+        </tr>
+      `).join("");
+
+      if (includeBlankEnd) {
+        return rowsHtml + `
+          <tr class="empty-end-row">
+            <td colspan="8">以下空白</td>
+          </tr>
+        `;
+      }
+      return rowsHtml;
+    }
+
+    function renderPage(data) {
+      currentData = data || DEFAULT_DATA;
+      const q = currentData.queryInfo || {};
+
+      document.getElementById("val-inquirer").textContent = q.inquirer || "";
+      document.getElementById("val-content").textContent = q.content || "";
+      document.getElementById("val-time").textContent = q.time || "";
+      document.getElementById("val-code").textContent = q.code || "";
+      document.getElementById("btn-open-modal").textContent = q.buttonText || "点击查看";
+
+      document.getElementById("val-warning").textContent = currentData.warningText || "此核验码有效，请核对元器件参数是否正确！";
+      document.getElementById("val-upper-title").textContent = currentData.tableTitle || "元器件参数详情表";
+      document.getElementById("val-lower-title").textContent = currentData.tableTitle || "元器件参数详情表";
+      document.getElementById("val-note").textContent = currentData.noteText || "注：状态表示元器件核验结果";
+      document.getElementById("val-print-date").textContent = currentData.printDate || "";
+      document.getElementById("val-page-info").textContent = currentData.pageInfo || "";
+      document.getElementById("val-seal-text").textContent = currentData.sealText || "元器件核验专用章";
+
+      document.getElementById("upper-table-body").innerHTML = renderRows(currentData.upperTable, false);
+      document.getElementById("lower-table-body").innerHTML = renderRows(currentData.lowerTable, true);
+    }
+
+    // 初始化异步加载 ./data.json（带时间戳防缓存）
+    async function loadData() {
+      try {
+        const res = await fetch("./data.json?t=" + Date.now(), { cache: "no-store" });
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        const json = await res.json();
+        renderPage(json);
+      } catch (err) {
+        renderPage(DEFAULT_DATA);
+      }
+    }
+
+    // 模态框文件预览逻辑
+    const modal = document.getElementById("file-modal");
+    const modalBody = document.getElementById("modal-body-content");
+
+    document.getElementById("btn-open-modal").addEventListener("click", () => {
+      const q = (currentData && currentData.queryInfo) || {};
+      const fileUrl = (q.fileUrl || "").trim();
+      const allItems = [].concat(currentData.upperTable || [], currentData.lowerTable || []);
+
+      // 如果配置了图片后缀链接，则同时展示图片与电子核验单
+      const isImage = /\.(png|jpe?g|gif|webp|svg)(\?.*)?$/i.test(fileUrl);
+
+      let previewHtml = "";
+      if (isImage) {
+        previewHtml += `<div style="margin-bottom:16px;"><img src="${escapeHtml(fileUrl)}" alt="核验附件" style="max-width:100%;height:auto;border:1px solid #ddd;border-radius:4px;"></div>`;
+      }
+
+      previewHtml += `
+        <div class="cert-sheet">
+          <div class="cert-sheet-title">元器件可信核验电子凭证</div>
+          <div class="cert-meta-list">
+            <div><strong>查询人：</strong>${escapeHtml(q.inquirer)}</div>
+            <div><strong>查询内容：</strong>${escapeHtml(q.content)}</div>
+            <div><strong>查询时间：</strong>${escapeHtml(q.time)}</div>
+            <div><strong>查询编码：</strong>${escapeHtml(q.code)}</div>
+            <div><strong>打印日期：</strong>${escapeHtml(currentData.printDate)}（${escapeHtml(currentData.pageInfo)}）</div>
+          </div>
+          <div class="table-scroll-wrap">
+            <table class="param-table">
+              <thead>
+                <tr>
+                  <th>元器件名称</th>
+                  <th>型号</th>
+                  <th>封装</th>
+                  <th>参数规格</th>
+                  <th>厂商</th>
+                  <th>批次</th>
+                  <th>类别</th>
+                  <th>状态</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${renderRows(allItems, true)}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+
+      modalBody.innerHTML = previewHtml;
+      modal.classList.add("show");
+    });
+
+    document.getElementById("btn-close-modal").addEventListener("click", () => {
+      modal.classList.remove("show");
+    });
+
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) {
+        modal.classList.remove("show");
+      }
+    });
+
+    loadData();
+  </script>
+</body>
+</html>
