@@ -3,9 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>元器件可信查询服务平台 - 可视化配置与二维码后台</title>
-  <!-- 引入国内稳定 CDN 的 qrcode.min.js -->
-  <script src="https://cdn.staticfile.net/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <title>元器件可信查询服务平台 - 可视化配置后台</title>
   <style>
     * {
       box-sizing: border-box;
@@ -49,7 +47,7 @@
     }
 
     .container {
-      max-width: 1280px;
+      max-width: 1100px;
       margin: 24px auto;
       padding: 0 16px;
       display: grid;
@@ -58,7 +56,7 @@
       align-items: start;
     }
 
-    @media (max-width: 992px) {
+    @media (max-width: 920px) {
       .container {
         grid-template-columns: 1fr;
       }
@@ -87,7 +85,7 @@
 
     .form-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
       gap: 14px;
     }
 
@@ -118,7 +116,6 @@
       border-color: #1ca261;
     }
 
-    /* 按钮样式 */
     .btn {
       display: inline-flex;
       align-items: center;
@@ -164,7 +161,7 @@
     .btn-danger {
       background-color: #fee2e2;
       color: #b91c1c;
-      padding: 5px 10px;
+      padding: 6px 12px;
       font-size: 12px;
     }
 
@@ -172,62 +169,15 @@
       background-color: #fecaca;
     }
 
-    /* 表格编辑器 */
-    .table-editor-wrap {
-      overflow-x: auto;
-    }
-
-    .editor-table {
-      width: 100%;
-      min-width: 820px;
-      border-collapse: collapse;
-      font-size: 13px;
-    }
-
-    .editor-table th {
-      background-color: #f8fafc;
-      color: #475569;
-      font-weight: 600;
-      text-align: left;
-      padding: 8px;
-      border: 1px solid #e2e8f0;
-    }
-
-    .editor-table td {
-      padding: 6px;
-      border: 1px solid #e2e8f0;
-    }
-
-    .editor-table input {
-      width: 100%;
-      padding: 6px 8px;
-      border: 1px solid #cbd5e1;
-      border-radius: 4px;
-      font-size: 13px;
-    }
-
-    .editor-table input:focus {
-      outline: none;
-      border-color: #1ca261;
-    }
-
-    /* 二维码展示区 */
-    .qr-box {
+    .img-row {
       display: flex;
-      flex-direction: column;
+      gap: 10px;
       align-items: center;
-      padding: 18px 12px;
-      background-color: #f8fafc;
-      border: 1px dashed #cbd5e1;
-      border-radius: 8px;
-      margin: 12px 0;
+      margin-bottom: 10px;
     }
 
-    #qrcode-canvas {
-      background: #ffffff;
-      padding: 12px;
-      border-radius: 6px;
-      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+    .img-row input {
+      flex: 1;
     }
 
     .status-msg {
@@ -278,7 +228,7 @@
   </header>
 
   <div class="container">
-    <!-- 左侧：数据可视化表单 -->
+    <!-- 左侧：数据与图片配置 -->
     <div class="left-col">
       <!-- 1. 查询基本信息 -->
       <div class="card">
@@ -303,22 +253,6 @@
             <label for="f-code">查询编码</label>
             <input type="text" id="f-code" class="form-control" placeholder="D6B79C81338E0589BB1D7AC29BC7698Fecmp">
           </div>
-          <div class="form-group">
-            <label for="f-fileUrl">查看文件链接 (图片或 PDF 路径)</label>
-            <input type="text" id="f-fileUrl" class="form-control" placeholder="./report.pdf">
-          </div>
-          <div class="form-group">
-            <label for="f-printDate">打印日期</label>
-            <input type="text" id="f-printDate" class="form-control" placeholder="2026-09-09">
-          </div>
-          <div class="form-group">
-            <label for="f-pageInfo">页码信息</label>
-            <input type="text" id="f-pageInfo" class="form-control" placeholder="第1页，共2页">
-          </div>
-          <div class="form-group">
-            <label for="f-sealText">印章中心文字</label>
-            <input type="text" id="f-sealText" class="form-control" placeholder="元器件核验专用章">
-          </div>
           <div class="form-group" style="grid-column: 1 / -1;">
             <label for="f-warningText">红字警示语</label>
             <input type="text" id="f-warningText" class="form-control" placeholder="此核验码有效，请核对元器件参数是否正确！">
@@ -326,81 +260,19 @@
         </div>
       </div>
 
-      <!-- 2. 上表数据管理 -->
+      <!-- 2. 页面下方展示图片 & 缩略图配置 -->
       <div class="card">
         <div class="card-title">
-          <span>二、上表数据（元器件参数详情表 1 — 带红色印章）</span>
-          <button type="button" class="btn btn-primary" id="btn-add-upper" style="padding: 5px 12px; font-size: 12px;">+ 新增一行</button>
+          <span>二、下方详情图片列表（点击“点击查看”时也会展示这些图片的缩略图）</span>
+          <button type="button" class="btn btn-primary" id="btn-add-image" style="padding: 5px 12px; font-size: 12px;">+ 新增一张图片</button>
         </div>
-        <div class="table-editor-wrap">
-          <table class="editor-table">
-            <thead>
-              <tr>
-                <th style="width: 14%;">元器件名称</th>
-                <th style="width: 17%;">型号</th>
-                <th style="width: 11%;">封装</th>
-                <th style="width: 20%;">参数规格</th>
-                <th style="width: 10%;">厂商</th>
-                <th style="width: 9%;">批次</th>
-                <th style="width: 10%;">类别</th>
-                <th style="width: 8%;">状态</th>
-                <th style="width: 60px;">操作</th>
-              </tr>
-            </thead>
-            <tbody id="editor-upper-body"></tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- 3. 下表数据管理 -->
-      <div class="card">
-        <div class="card-title">
-          <span>三、下表数据（元器件参数详情表 2 — 末行自动带“以下空白”）</span>
-          <button type="button" class="btn btn-primary" id="btn-add-lower" style="padding: 5px 12px; font-size: 12px;">+ 新增一行</button>
-        </div>
-        <div class="table-editor-wrap">
-          <table class="editor-table">
-            <thead>
-              <tr>
-                <th style="width: 14%;">元器件名称</th>
-                <th style="width: 17%;">型号</th>
-                <th style="width: 11%;">封装</th>
-                <th style="width: 20%;">参数规格</th>
-                <th style="width: 10%;">厂商</th>
-                <th style="width: 9%;">批次</th>
-                <th style="width: 10%;">类别</th>
-                <th style="width: 8%;">状态</th>
-                <th style="width: 60px;">操作</th>
-              </tr>
-            </thead>
-            <tbody id="editor-lower-body"></tbody>
-          </table>
-        </div>
+        <div id="images-editor-list"></div>
+        <div class="help-tip">提示：把图片放在项目同一文件夹下，填写相对路径（如 <code>./例图1.png</code>、<code>./例图2.png</code>）即可。</div>
       </div>
     </div>
 
-    <!-- 右侧：二维码生成与 GitHub API 在线直改设置 -->
+    <!-- 右侧：GitHub API 在线直改设置 -->
     <div class="right-col">
-      <!-- 内置二维码生成器 -->
-      <div class="card">
-        <div class="card-title">
-          <span>专属二维码生成器</span>
-        </div>
-        <div class="form-group">
-          <label for="qr-url-input">扫码目标网址</label>
-          <input type="text" id="qr-url-input" class="form-control" value="https://lijiawang.online">
-          <span class="help-tip">默认指向 https://lijiawang.online，修改后可实时重新生成。</span>
-        </div>
-        <div class="qr-box">
-          <div id="qrcode-canvas"></div>
-        </div>
-        <div style="display: flex; gap: 8px; width: 100%;">
-          <button type="button" class="btn btn-outline" id="btn-regen-qr" style="flex: 1;">刷新二维码</button>
-          <button type="button" class="btn btn-primary" id="btn-download-qr" style="flex: 1;">下载二维码图片</button>
-        </div>
-      </div>
-
-      <!-- 模式二：GitHub API 在线直改配置 -->
       <div class="card">
         <div class="card-title">
           <span>GitHub API 在线直改设置</span>
@@ -420,7 +292,7 @@
         <div class="form-group" style="margin-bottom: 14px;">
           <label for="gh-token">GitHub Personal Access Token</label>
           <input type="password" id="gh-token" class="form-control" placeholder="ghp_xxxxxxxx 或 github_pat_xxxx">
-          <span class="help-tip">Token 仅保存在您当前浏览器的 localStorage 中，不会上传至任何第三方。需勾选 repo / Contents 读写权限。</span>
+          <span class="help-tip">Token 仅保存在您当前浏览器的 localStorage 中，不会上传至任何第三方。</span>
         </div>
         <button type="button" class="btn btn-blue" id="btn-github-push-side" style="width: 100%;">立即在线发布更新至 GitHub</button>
         <div id="status-box" class="status-msg"></div>
@@ -435,24 +307,12 @@
         content: "元器件型号详情",
         time: "2026-09-09 09:06:26",
         code: "D6B79C81338E0589BB1D7AC29BC7698Fecmp",
-        fileUrl: "./report.pdf",
         buttonText: "点击查看"
       },
       warningText: "此核验码有效，请核对元器件参数是否正确！",
-      tableTitle: "元器件参数详情表",
-      noteText: "注：状态表示元器件核验结果",
-      printDate: "2026-09-09",
-      pageInfo: "第1页，共2页",
-      sealText: "元器件核验专用章",
-      upperTable: [
-        { name: "运算放大器", model: "OP07CP", package: "DIP-8", spec: "低噪声精密运放", vendor: "TI", batch: "2534+", category: "模拟芯片", status: "正品" },
-        { name: "STM32单片机", model: "STM32F103C8T6", package: "LQFP48", spec: "72MHz,64KB Flash", vendor: "ST", batch: "2611+", category: "MCU", status: "正品" },
-        { name: "稳压LDO", model: "AMS1117-3.3", package: "SOT-223", spec: "3.3V 1A", vendor: "AMS", batch: "2605+", category: "电源芯片", status: "正品" },
-        { name: "光耦", model: "PC817C", package: "DIP-4", spec: "电流传输比50~600%", vendor: "SHARP", batch: "2548+", category: "光电器件", status: "正品" }
-      ],
-      lowerTable: [
-        { name: "电阻", model: "0805 10kΩ", package: "0805", spec: "5% 1/8W", vendor: "国巨", batch: "2602+", category: "无源器件", status: "正品" },
-        { name: "电容", model: "0603 104", package: "0603", spec: "0.1uF 50V", vendor: "三星", batch: "2601+", category: "无源器件", status: "正品" }
+      images: [
+        "./例图1.png",
+        "./例图2.png"
       ]
     };
 
@@ -461,23 +321,17 @@
       return String(str).replace(/"/g, "&quot;");
     }
 
-    function createRowElement(item = {}) {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td><input type="text" data-field="name" value="${escapeAttr(item.name || "")}" placeholder="名称"></td>
-        <td><input type="text" data-field="model" value="${escapeAttr(item.model || "")}" placeholder="型号"></td>
-        <td><input type="text" data-field="package" value="${escapeAttr(item.package || "")}" placeholder="封装"></td>
-        <td><input type="text" data-field="spec" value="${escapeAttr(item.spec || "")}" placeholder="参数规格"></td>
-        <td><input type="text" data-field="vendor" value="${escapeAttr(item.vendor || "")}" placeholder="厂商"></td>
-        <td><input type="text" data-field="batch" value="${escapeAttr(item.batch || "")}" placeholder="批次"></td>
-        <td><input type="text" data-field="category" value="${escapeAttr(item.category || "")}" placeholder="类别"></td>
-        <td><input type="text" data-field="status" value="${escapeAttr(item.status || "正品")}" placeholder="状态"></td>
-        <td><button type="button" class="btn btn-danger btn-del-row">删除</button></td>
+    function createImageRow(url = "") {
+      const div = document.createElement("div");
+      div.className = "img-row";
+      div.innerHTML = `
+        <input type="text" class="form-control img-url-input" value="${escapeAttr(url)}" placeholder="例如：./例图1.png">
+        <button type="button" class="btn btn-danger btn-del-img">删除</button>
       `;
-      tr.querySelector(".btn-del-row").addEventListener("click", () => {
-        tr.remove();
+      div.querySelector(".btn-del-img").addEventListener("click", () => {
+        div.remove();
       });
-      return tr;
+      return div;
     }
 
     function fillEditorForm(data) {
@@ -487,52 +341,31 @@
       document.getElementById("f-content").value = q.content || "";
       document.getElementById("f-time").value = q.time || "";
       document.getElementById("f-code").value = q.code || "";
-      document.getElementById("f-fileUrl").value = q.fileUrl || "./report.pdf";
-      document.getElementById("f-printDate").value = d.printDate || "";
-      document.getElementById("f-pageInfo").value = d.pageInfo || "";
-      document.getElementById("f-sealText").value = d.sealText || "元器件核验专用章";
       document.getElementById("f-warningText").value = d.warningText || "此核验码有效，请核对元器件参数是否正确！";
 
-      const upperBody = document.getElementById("editor-upper-body");
-      upperBody.innerHTML = "";
-      (d.upperTable || []).forEach(row => upperBody.appendChild(createRowElement(row)));
-
-      const lowerBody = document.getElementById("editor-lower-body");
-      lowerBody.innerHTML = "";
-      (d.lowerTable || []).forEach(row => lowerBody.appendChild(createRowElement(row)));
-    }
-
-    function collectTableRows(tbodyId) {
-      const rows = [];
-      const trs = document.querySelectorAll(`#${tbodyId} tr`);
-      trs.forEach(tr => {
-        const rowObj = {};
-        tr.querySelectorAll("input[data-field]").forEach(input => {
-          rowObj[input.getAttribute("data-field")] = input.value.trim();
-        });
-        rows.push(rowObj);
-      });
-      return rows;
+      const imgListContainer = document.getElementById("images-editor-list");
+      imgListContainer.innerHTML = "";
+      const imgs = (Array.isArray(d.images) && d.images.length > 0) ? d.images : DEFAULT_DATA.images;
+      imgs.forEach(url => imgListContainer.appendChild(createImageRow(url)));
     }
 
     function collectFormData() {
+      const images = [];
+      document.querySelectorAll("#images-editor-list .img-url-input").forEach(input => {
+        const val = input.value.trim();
+        if (val) images.push(val);
+      });
+
       return {
         queryInfo: {
           inquirer: document.getElementById("f-inquirer").value.trim(),
           content: document.getElementById("f-content").value.trim(),
           time: document.getElementById("f-time").value.trim(),
           code: document.getElementById("f-code").value.trim(),
-          fileUrl: document.getElementById("f-fileUrl").value.trim() || "./report.pdf",
           buttonText: "点击查看"
         },
         warningText: document.getElementById("f-warningText").value.trim(),
-        tableTitle: "元器件参数详情表",
-        noteText: "注：状态表示元器件核验结果",
-        printDate: document.getElementById("f-printDate").value.trim(),
-        pageInfo: document.getElementById("f-pageInfo").value.trim(),
-        sealText: document.getElementById("f-sealText").value.trim() || "元器件核验专用章",
-        upperTable: collectTableRows("editor-upper-body"),
-        lowerTable: collectTableRows("editor-lower-body")
+        images: images
       };
     }
 
@@ -547,17 +380,8 @@
       }
     }
 
-    // 新增行按钮事件
-    document.getElementById("btn-add-upper").addEventListener("click", () => {
-      document.getElementById("editor-upper-body").appendChild(
-        createRowElement({ status: "正品" })
-      );
-    });
-
-    document.getElementById("btn-add-lower").addEventListener("click", () => {
-      document.getElementById("editor-lower-body").appendChild(
-        createRowElement({ status: "正品" })
-      );
+    document.getElementById("btn-add-image").addEventListener("click", () => {
+      document.getElementById("images-editor-list").appendChild(createImageRow("./例图1.png"));
     });
 
     document.getElementById("btn-reload-online").addEventListener("click", () => {
@@ -608,7 +432,6 @@
         return;
       }
 
-      // 保存配置到本地浏览器
       localStorage.setItem("agy_gh_repo", repo);
       localStorage.setItem("agy_gh_branch", branch);
       localStorage.setItem("agy_gh_path", path);
@@ -623,7 +446,6 @@
       };
 
       try {
-        // 1. 先获取当前文件的 sha（如果文件已存在）
         let sha = undefined;
         const getRes = await fetch(`${apiUrl}?ref=${encodeURIComponent(branch)}`, {
           headers,
@@ -638,7 +460,6 @@
           throw new Error(errData.message || `获取文件信息失败 (HTTP ${getRes.status})`);
         }
 
-        // 2. 提交更新后的 data.json
         const newContent = JSON.stringify(collectFormData(), null, 2) + "\n";
         const bodyPayload = {
           message: `Update ${path} via online editor (${new Date().toISOString()})`,
@@ -663,7 +484,7 @@
           throw new Error(errData.message || `提交失败 (HTTP ${putRes.status})`);
         }
 
-        showStatus("发布成功！GitHub 仓库中的 data.json 已更新，Cloudflare Pages 将在几十秒内自动完成同步部署。", "success");
+        showStatus("发布成功！GitHub 仓库中的 data.json 已更新，Cloudflare Pages 将自动同步部署。", "success");
       } catch (err) {
         showStatus("发布失败：" + err.message, "error");
       }
@@ -672,7 +493,6 @@
     document.getElementById("btn-github-push").addEventListener("click", pushToGitHub);
     document.getElementById("btn-github-push-side").addEventListener("click", pushToGitHub);
 
-    // 读取本地保存的 GitHub 配置
     (function restoreGitHubConfig() {
       const savedRepo = localStorage.getItem("agy_gh_repo");
       const savedBranch = localStorage.getItem("agy_gh_branch");
@@ -684,57 +504,7 @@
       if (savedToken) document.getElementById("gh-token").value = savedToken;
     })();
 
-    // 二维码生成与高清图片下载
-    const qrContainer = document.getElementById("qrcode-canvas");
-    let qrInstance = null;
-
-    function generateQRCode() {
-      const targetUrl = document.getElementById("qr-url-input").value.trim() || "https://lijiawang.online";
-      qrContainer.innerHTML = "";
-      if (typeof QRCode !== "undefined") {
-        qrInstance = new QRCode(qrContainer, {
-          text: targetUrl,
-          width: 220,
-          height: 220,
-          colorDark: "#000000",
-          colorLight: "#ffffff",
-          correctLevel: QRCode.CorrectLevel.H
-        });
-      } else {
-        qrContainer.innerHTML = '<div style="color:#b91c1c;font-size:12px;padding:20px;">二维码组件加载中或网络受限，请检查网络后刷新。</div>';
-      }
-    }
-
-    document.getElementById("btn-regen-qr").addEventListener("click", generateQRCode);
-    document.getElementById("qr-url-input").addEventListener("change", generateQRCode);
-
-    document.getElementById("btn-download-qr").addEventListener("click", () => {
-      const img = qrContainer.querySelector("img");
-      const canvas = qrContainer.querySelector("canvas");
-      let dataUrl = "";
-
-      if (canvas) {
-        dataUrl = canvas.toDataURL("image/png");
-      } else if (img && img.src) {
-        dataUrl = img.src;
-      }
-
-      if (!dataUrl) {
-        showStatus("请先生成二维码后再下载！", "error");
-        return;
-      }
-
-      const a = document.createElement("a");
-      a.href = dataUrl;
-      a.download = "lijiawang-online-qrcode.png";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    });
-
-    // 初始化加载数据与生成二维码
     loadOnlineData();
-    generateQRCode();
   </script>
 </body>
 </html>
